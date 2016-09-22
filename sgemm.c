@@ -4,21 +4,44 @@
 */
 
 #include "f2c.h"
+#include "blas_headers.h"
 
-static int (*next_sgemm_)(char *transa, char *transb, integer *m, integer *
-	n, integer *k, real *alpha, real *a, integer *lda, real *b, integer *
-	ldb, real *beta, real *c, integer *ldc) = NULL;
+static void (*next_cblas_sgemm) (const enum CBLAS_ORDER Order,
+    const enum CBLAS_TRANSPOSE TA, const enum CBLAS_TRANSPOSE TB,
+    const int M, const int N, const int K,
+    const float alpha, const float *A, const int lda,
+    const float *B, const int ldb, const float beta,
+    float *C, const int ldc) = NULL;
 
-/* Subroutine */ int sgemm_(char *transa, char *transb, integer *m, integer *
-	n, integer *k, real *alpha, real *a, integer *lda, real *b, integer *
-	ldb, real *beta, real *c, integer *ldc)
+void cblas_sgemm(const enum CBLAS_ORDER Order,
+    const enum CBLAS_TRANSPOSE TA, const enum CBLAS_TRANSPOSE TB,
+    const int M, const int N, const int K,
+    const float alpha, const float *A, const int lda,
+    const float *B, const int ldb, const float beta,
+    float *C, const int ldc){
+  if (next_cblas_sgemm == NULL) {
+    printf("calling MRVL cblas_sgemm\n");
+    next_cblas_sgemm = dlsym(RTLD_NEXT, "cblas_sgemm");
+  }
+  next_cblas_sgemm(Order, TA, TB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+}
+
+static int (*next_sgemm_)(char *transa, char *transb, const int *m, const int *	n,
+    const int *k, real *alpha, real *a, const int *lda, real *b, const int *ldb,
+    real *beta, real *c, const int *ldc) = NULL;
+
+/* Subroutine */ int sgemm_(char *transa, char *transb, const int *m, const int *	n,
+    const int *k, real *alpha, real *a, const int *lda,
+    real *b, const int *ldb, real *beta, real *c, const int *ldc)
 {
-  printf("call mrvl sgemm_\n");
   if (next_sgemm_ == NULL){
+    printf("calling MRVL sgemm_\n");
+    printf("transa=%s, transb=%s, m=%d, n=%d, k=%d, alpha=%f, a=%p, lda=%d, b=%p, ldb=%d, beta=%f, c=%p, ldc=%d\n",
+        transa, transb, *m, *n, *k, *alpha, a, *lda, b, *ldb, *beta, c, *ldc);
     next_sgemm_ = dlsym(RTLD_NEXT, "sgemm_");
   }
-  next_sgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
-  return 0;
+  //next_sgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
+  //return 0;
 
   /* System generated locals */
   integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, i__1, i__2,

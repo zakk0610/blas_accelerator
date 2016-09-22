@@ -4,34 +4,58 @@
 */
 
 #include "f2c.h"
+#include "blas_headers.h"
 
-static int (*next_dgemm_)(char *transa, char *transb, integer *m, integer *n, integer *k, doublereal *alpha, doublereal *a, integer *lda,doublereal *b, integer *ldb, doublereal *beta, doublereal *c, integer *ldc) = NULL;
+static void (*next_cblas_dgemm) (const enum CBLAS_ORDER Order,
+    const enum CBLAS_TRANSPOSE TA, const enum CBLAS_TRANSPOSE TB,
+    const int M, const int N, const int K,
+    const double alpha, const double *A, const int lda,
+    const double *B, const int ldb, const double beta,
+    double *C, const int ldc) = NULL;
 
-/* Subroutine */ int dgemm_(char *transa, char *transb, integer *m, integer *
-	n, integer *k, doublereal *alpha, doublereal *a, integer *lda,
-	doublereal *b, integer *ldb, doublereal *beta, doublereal *c, integer
-	*ldc)
+void cblas_dgemm(const enum CBLAS_ORDER Order,
+    const enum CBLAS_TRANSPOSE TA, const enum CBLAS_TRANSPOSE TB,
+    const int M, const int N, const int K,
+    const double alpha, const double *A, const int lda,
+    const double *B, const int ldb, const double beta,
+    double *C, const int ldc){
+  if (next_cblas_dgemm == NULL) {
+    printf("calling MRVL cblas_dgemm\n");
+    next_cblas_dgemm = dlsym(RTLD_NEXT, "cblas_dgemm");
+  }
+  next_cblas_dgemm(Order, TA, TB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
+}
+
+static int (*next_dgemm_)(char *transa, char *transb, const int *m, const int *n,
+    const int *k, doublereal *alpha, doublereal *a, const int *lda, doublereal *b, const int *ldb,
+    doublereal *beta, doublereal *c, const int *ldc) = NULL;
+
+/* Subroutine */ int dgemm_(char *transa, char *transb, const int *m, const int * n,
+    const int *k, doublereal *alpha, doublereal *a, const int *lda,
+    doublereal *b, const int *ldb, doublereal *beta, doublereal *c, const int	*ldc)
 {
 
-  printf("call mrvl dgemm_\n");
   if (next_dgemm_ == NULL){
+    printf("calling MRVL dgemm_\n");
+    printf("transa=%s, transb=%s, m=%d, n=%d, k=%d, alpha=%f, a=%p, lda=%d, b=%p, ldb=%d, beta=%f, c=%p, ldc=%d\n",
+        transa, transb, *m, *n, *k, *alpha, a, *lda, b, *ldb, *beta, c, *ldc);
     next_dgemm_ = dlsym(RTLD_NEXT, "dgemm_");
   }
-  next_dgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
-  return 0;
+  //next_dgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
+  //return 0;
 
   /* System generated locals */
-  integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, i__1, i__2,
+  int a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, i__1, i__2,
           i__3;
 
   /* Local variables */
-  static integer info;
-  static logical nota, notb;
+  static int info;
+  static int nota, notb;
   static doublereal temp;
-  static integer i, j, l, ncola;
-  extern logical lsame_(char *, char *);
-  static integer nrowa, nrowb;
-  extern /* Subroutine */ int xerbla_(char *, integer *);
+  static int i, j, l, ncola;
+  extern int lsame_(char *, char *);
+  static int nrowa, nrowb;
+  extern /* Subroutine */ int xerbla_(char *, int *);
 
 
   /*  Purpose
@@ -200,7 +224,7 @@ Unchanged on exit.
 #define B(I,J) b[(I)-1 + ((J)-1)* ( *ldb)]
 #define C(I,J) c[(I)-1 + ((J)-1)* ( *ldc)]
 
-    nota = lsame_(transa, "N");
+  nota = lsame_(transa, "N");
   notb = lsame_(transb, "N");
   if (nota) {
     nrowa = *m;
