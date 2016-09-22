@@ -6,13 +6,21 @@
 
 #include "f2c.h"
 
-/* Subroutine */ int cblas_dgemm(char *transa, char *transb, integer *m, integer *
+static int (*next_dgemm_)(char *transa, char *transb, integer *m, integer *n, integer *k, doublereal *alpha, doublereal *a, integer *lda,doublereal *b, integer *ldb, doublereal *beta, doublereal *c, integer *ldc) = NULL;
+
+/* Subroutine */ int dgemm_(char *transa, char *transb, integer *m, integer *
 	n, integer *k, doublereal *alpha, doublereal *a, integer *lda, 
 	doublereal *b, integer *ldb, doublereal *beta, doublereal *c, integer 
 	*ldc)
 {
 
     printf("call mrvl dgemm_\n");
+    if (next_dgemm_ == NULL){
+      next_dgemm_ = dlsym(RTLD_NEXT, "dgemm_");
+    }
+    next_dgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
+    return 0;
+
     /* System generated locals */
     integer a_dim1, a_offset, b_dim1, b_offset, c_dim1, c_offset, i__1, i__2, 
 	    i__3;

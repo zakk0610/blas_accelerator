@@ -4,9 +4,12 @@
 
 	- From The Shogakukan DICTIONARY OF NEW ENGLISH (Second edition) */
 
-#include <stdio.h>
 #ifndef F2C_INCLUDE
 #define F2C_INCLUDE
+
+#define _GNU_SOURCE
+#include <dlfcn.h>
+#include <stdio.h>
 
 typedef long int integer;
 typedef unsigned long int uinteger;
