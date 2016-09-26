@@ -4,7 +4,7 @@
 */
 
 #include "f2c.h"
-#include "blas_headers.h"
+#include "cblas_headers.h"
 
 static void (*next_cblas_dgemm) (const enum CBLAS_ORDER Order,
     const enum CBLAS_TRANSPOSE TA, const enum CBLAS_TRANSPOSE TB,
