@@ -4,10 +4,11 @@ This example shows calling dgemm Fortran interface in C. https://gist.github.com
 
 ```
 */
-#include "stdio.h"
-#include "stdlib.h"
-#include "sys/time.h"
-#include "time.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/time.h>
+#include <time.h>
+#include "cblas_headers.h"
 
 extern void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
 
@@ -40,33 +41,33 @@ int main(int argc, char* argv[])
 
   srand((unsigned)time(NULL));
 
-  printf("A=");
+  DEBUG_PRINT("A=");
   for (i=0; i<sizeofa; i++) {
     A[i] = i%3+1;
-    printf("%f,", A[i]);
+    DEBUG_PRINT("%f,", A[i]);
   }
-  printf("\nB=");
+  DEBUG_PRINT("\nB=");
   for (i=0; i<sizeofb; i++) {
     B[i] = i%3+1;
-    printf("%f,", B[i]);
+    DEBUG_PRINT("%f,", B[i]);
   }
-  printf("\nC=");
+  DEBUG_PRINT("\nC=");
   for (i=0; i<sizeofc; i++) {
     C[i] = i%3+1;
-    printf("%f,", C[i]);
+    DEBUG_PRINT("%f,", C[i]);
   }
-  printf("\n");
+  DEBUG_PRINT("\n");
 
   printf("m=%d,n=%d,k=%d,alpha=%lf,beta=%lf,sizeofc=%d\n",m,n,k,alpha,beta,sizeofc);
   gettimeofday(&start, NULL);
   dgemm_(&ta, &tb, &m, &n, &k, &alpha, A, &m, B, &k, &beta, C, &m);
   gettimeofday(&finish, NULL);
 
-  printf("result=");
+  DEBUG_PRINT("result=");
   for (i=0; i<sizeofc; i++) {
-    printf("%f,", C[i]);
+    DEBUG_PRINT("%f,", C[i]);
   }
-  printf("\n");
+  DEBUG_PRINT("\n");
 
   duration = ((double)(finish.tv_sec-start.tv_sec)*1000000 + (double)(finish.tv_usec-start.tv_usec)) / 1000000;
   double gflops = 2.0 * m *n*k;
@@ -75,6 +76,7 @@ int main(int argc, char* argv[])
   FILE *fp;
   fp = fopen("timeDGEMM.txt", "a");
   fprintf(fp, "%dx%dx%d\t%lf s\t%lf MFLOPS\n", m, n, k, duration, gflops);
+  printf("%dx%dx%d\tduration:%lf s\t%lf MFLOPS\n", m, n, k, duration, gflops);
   fclose(fp);
 
   free(A);

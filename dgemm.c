@@ -20,7 +20,7 @@ void cblas_dgemm(const enum CBLAS_ORDER Order,
     const double *B, const int ldb, const double beta,
     double *C, const int ldc){
   if (next_cblas_dgemm == NULL) {
-    printf("calling MRVL cblas_dgemm\n");
+    DEBUG_PRINT("calling MRVL cblas_dgemm\n");
     next_cblas_dgemm = dlsym(RTLD_NEXT, "cblas_dgemm");
   }
   next_cblas_dgemm(Order, TA, TB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
@@ -36,11 +36,11 @@ static int (*next_dgemm_)(char *transa, char *transb, const int *m, const int *n
 {
 
   if (next_dgemm_ == NULL){
-    printf("calling MRVL dgemm_\n");
-    printf("transa=%s, transb=%s, m=%d, n=%d, k=%d, alpha=%f, a=%p, lda=%d, b=%p, ldb=%d, beta=%f, c=%p, ldc=%d\n",
-        transa, transb, *m, *n, *k, *alpha, a, *lda, b, *ldb, *beta, c, *ldc);
+    DEBUG_PRINT("calling MRVL dgemm_\n");
     next_dgemm_ = dlsym(RTLD_NEXT, "dgemm_");
   }
+  DEBUG_PRINT("transa=%c, transb=%c, m=%d, n=%d, k=%d, alpha=%f, a=%p, lda=%d, b=%p, ldb=%d, beta=%f, c=%p, ldc=%d\n",
+      *transa, *transb, *m, *n, *k, *alpha, a, *lda, b, *ldb, *beta, c, *ldc);
   //next_dgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
   //return 0;
 
@@ -280,9 +280,7 @@ Unchanged on exit.
         i__2 = *m;
         for (i = 1; i <= *m; ++i) {
           C(i,j) = 0.;
-          /* L10: */
         }
-        /* L20: */
       }
     } else {
       i__1 = *n;
@@ -290,9 +288,7 @@ Unchanged on exit.
         i__2 = *m;
         for (i = 1; i <= *m; ++i) {
           C(i,j) = *beta * C(i,j);
-          /* L30: */
         }
-        /* L40: */
       }
     }
     return 0;

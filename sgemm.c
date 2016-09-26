@@ -20,7 +20,7 @@ void cblas_sgemm(const enum CBLAS_ORDER Order,
     const float *B, const int ldb, const float beta,
     float *C, const int ldc){
   if (next_cblas_sgemm == NULL) {
-    printf("calling MRVL cblas_sgemm\n");
+    DEBUG_PRINT("calling MRVL cblas_sgemm\n");
     next_cblas_sgemm = dlsym(RTLD_NEXT, "cblas_sgemm");
   }
   next_cblas_sgemm(Order, TA, TB, M, N, K, alpha, A, lda, B, ldb, beta, C, ldc);
@@ -35,11 +35,11 @@ static int (*next_sgemm_)(char *transa, char *transb, const int *m, const int *	
     real *b, const int *ldb, real *beta, real *c, const int *ldc)
 {
   if (next_sgemm_ == NULL){
-    printf("calling MRVL sgemm_\n");
-    printf("transa=%s, transb=%s, m=%d, n=%d, k=%d, alpha=%f, a=%p, lda=%d, b=%p, ldb=%d, beta=%f, c=%p, ldc=%d\n",
-        transa, transb, *m, *n, *k, *alpha, a, *lda, b, *ldb, *beta, c, *ldc);
+    DEBUG_PRINT("calling MRVL sgemm_\n");
     next_sgemm_ = dlsym(RTLD_NEXT, "sgemm_");
   }
+  DEBUG_PRINT("transa=%c, transb=%c, m=%d, n=%d, k=%d, alpha=%f, a=%p, lda=%d, b=%p, ldb=%d, beta=%f, c=%p, ldc=%d\n",
+      *transa, *transb, *m, *n, *k, *alpha, a, *lda, b, *ldb, *beta, c, *ldc);
   //next_sgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
   //return 0;
 
