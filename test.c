@@ -9,6 +9,7 @@ This example shows calling dgemm Fortran interface in C. https://gist.github.com
 #include <sys/time.h>
 #include <time.h>
 #include "cblas_headers.h"
+#include "debug.h"
 
 extern void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
 
@@ -30,7 +31,7 @@ int main(int argc, char* argv[])
   char ta = 'N';
   char tb = 'N';
   double alpha = 1;
-  double beta = 1;
+  double beta = 0;
 
   struct timeval start,finish;
   double duration;

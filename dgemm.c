@@ -5,6 +5,8 @@
 
 #include "f2c.h"
 #include "cblas_headers.h"
+#include "accelerator.h"
+#include "debug.h"
 
 static void (*next_cblas_dgemm) (const enum CBLAS_ORDER Order,
     const enum CBLAS_TRANSPOSE TA, const enum CBLAS_TRANSPOSE TB,
@@ -35,10 +37,10 @@ static int (*next_dgemm_)(char *transa, char *transb, const int *m, const int *n
     doublereal *b, const int *ldb, doublereal *beta, doublereal *c, const int	*ldc)
 {
 
-  if (next_dgemm_ == NULL){
-    DEBUG_PRINT("calling MRVL dgemm_\n");
-    next_dgemm_ = dlsym(RTLD_NEXT, "dgemm_");
-  }
+  //if (next_dgemm_ == NULL){
+  //  DEBUG_PRINT("calling MRVL dgemm_\n");
+  //  next_dgemm_ = dlsym(RTLD_NEXT, "dgemm_");
+  //}
   DEBUG_PRINT("transa=%c, transb=%c, m=%d, n=%d, k=%d, alpha=%f, a=%p, lda=%d, b=%p, ldb=%d, beta=%f, c=%p, ldc=%d\n",
       *transa, *transb, *m, *n, *k, *alpha, a, *lda, b, *ldb, *beta, c, *ldc);
   //next_dgemm_(transa, transb, m, n, k, alpha, a, lda, b, ldb, beta, c, ldc);
@@ -52,7 +54,7 @@ static int (*next_dgemm_)(char *transa, char *transb, const int *m, const int *n
   static int info;
   static int nota, notb;
   static doublereal temp;
-  static int i, j, l, ncola;
+  static int i, j, l, ncola, ncolb;
   extern int lsame_(char *, char *);
   static int nrowa, nrowb;
   extern /* Subroutine */ int xerbla_(char *, int *);
@@ -235,8 +237,10 @@ Unchanged on exit.
   }
   if (notb) {
     nrowb = *k;
+    ncolb = *n;
   } else {
     nrowb = *n;
+    ncolb = *k;
   }
 
   /*     Test the input parameters. */
@@ -299,36 +303,44 @@ Unchanged on exit.
   if (notb) {
     if (nota) {
 
-      /*           Form  C := alpha*A*B + beta*C. */
-
-      i__1 = *n;
-      for (j = 1; j <= *n; ++j) {
-        if (*beta == 0.) {
-          i__2 = *m;
-          for (i = 1; i <= *m; ++i) {
-            C(i,j) = 0.;
-            /* L50: */
-          }
-        } else if (*beta != 1.) {
-          i__2 = *m;
-          for (i = 1; i <= *m; ++i) {
-            C(i,j) = *beta * C(i,j);
-            /* L60: */
-          }
-        }
-        i__2 = *k;
-        for (l = 1; l <= *k; ++l) {
-          if (B(l,j) != 0.) {
-            temp = *alpha * B(l,j);
-            i__3 = *m;
+      if (*alpha== 1. && *beta == 0.) {
+        /* column major C: = A * B */
+        DEBUG_PRINT("calling matrixMultiply\n");
+        matrixMultiply(&A(1,1), &B(1,1), &C(1,1),
+                       nrowa, ncola,
+                       nrowb, ncolb,
+                       nrowa, ncolb);
+      } else {
+        /*           Form  C := alpha*A*B + beta*C. */
+        i__1 = *n;
+        for (j = 1; j <= *n; ++j) {
+          if (*beta == 0.) {
+            i__2 = *m;
             for (i = 1; i <= *m; ++i) {
-              C(i,j) += temp * A(i,l);
-              /* L70: */
+              C(i,j) = 0.;
+              /* L50: */
+            }
+          } else if (*beta != 1.) {
+            i__2 = *m;
+            for (i = 1; i <= *m; ++i) {
+              C(i,j) = *beta * C(i,j);
+              /* L60: */
             }
           }
-          /* L80: */
+          i__2 = *k;
+          for (l = 1; l <= *k; ++l) {
+            if (B(l,j) != 0.) {
+              temp = *alpha * B(l,j);
+              i__3 = *m;
+              for (i = 1; i <= *m; ++i) {
+                C(i,j) += temp * A(i,l);
+                /* L70: */
+              }
+            }
+            /* L80: */
+          }
+          /* L90: */
         }
-        /* L90: */
       }
     } else {
 

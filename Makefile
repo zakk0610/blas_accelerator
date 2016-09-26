@@ -1,4 +1,4 @@
-SOURCES = sgemm.c dgemm.c
+SOURCES = sgemm.c dgemm.c accelerator.c
 OBJECTS =$(SOURCES:.c=.o)
 
 .PHONY: clean
@@ -22,4 +22,4 @@ test: test.c
 	gcc $^ -o $@ ${blas.ldflags} -g3 ${OPTION}
 
 clean:
-	rm *.o libmrvlblas.so test
+	rm *.o libmrvlblas.so test -f

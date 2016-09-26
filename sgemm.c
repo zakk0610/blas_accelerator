@@ -5,6 +5,8 @@
 
 #include "f2c.h"
 #include "cblas_headers.h"
+#include "accelerator.h"
+#include "debug.h"
 
 static void (*next_cblas_sgemm) (const enum CBLAS_ORDER Order,
     const enum CBLAS_TRANSPOSE TA, const enum CBLAS_TRANSPOSE TB,
