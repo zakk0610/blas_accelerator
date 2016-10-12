@@ -13,13 +13,13 @@ endif
 %.o: %.c
 	gcc -o $@ $^ -c -fPIC ${OPTION}
 
-blas.ldflags = -L/home/zakk/anaconda2/lib -lmkl_intel_lp64 -lmkl_intel_thread -lmkl_core -liomp5 -lpthread -lm -Wl,-rpath,/home/zakk/anaconda2/lib
+blas.ldflags = $(shell python -c 'import theano; print(theano.config.blas.ldflags)')
 
 all: clean $(OBJECTS) test
 	gcc $(OBJECTS) -shared -o libmrvlblas.so -fpic ${OPTION}
 
 test: test.c
-	gcc $^ -o $@ ${blas.ldflags} -g3 ${OPTION}
+	gcc $^ -o $@ ${blas.ldflags} ${OPTION}
 
 clean:
 	rm *.o libmrvlblas.so test -f
