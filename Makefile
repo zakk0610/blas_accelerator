@@ -23,3 +23,6 @@ test: test.c
 
 clean:
 	rm *.o libmrvlblas.so test -f
+
+check: test
+	LD_PRELOAD=./libmrvlblas.so ./test  2 3 10
